@@ -1,15 +1,13 @@
 from datetime import date
-from abc import ABC, abstractmethod
 
-class Pass(ABC):
-    """An abstract base class for different types of passes."""
+class Pass:
+    """A base class for different types of passes."""
     def __init__(self, passId, purchaseDate, price):
         """Initializes a new Pass."""
         self.passId = passId
         self.purchaseDate = purchaseDate
         self.price = price
 
-    @abstractmethod
     def is_eligible(self, exhibition):
         pass
 
