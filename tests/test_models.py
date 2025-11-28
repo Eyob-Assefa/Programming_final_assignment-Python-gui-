@@ -52,11 +52,11 @@ class TestDataManager(unittest.TestCase):
     def test_initialize_data_returns_expected_keys(self):
         """``initialize_data`` should return the expected structure."""
         data = data_manager.initialize_data()
-        self.assertIn("users", data)
-        self.assertIn("exhibitions", data)
-        self.assertGreaterEqual(len(data["users"]), 1)
-        self.assertGreaterEqual(len(data["exhibitions"]), 1)
+        self.assertIn("users", data) #checks if the users key is in the data
+        self.assertIn("exhibitions", data) #checks if the exhibitions key is in the data
+        self.assertGreaterEqual(len(data["users"]), 1) #checks if the number of users is greater than or equal to 1
+        self.assertGreaterEqual(len(data["exhibitions"]), 1) #checks if the number of exhibitions is greater than or equal to 1
 
 
-if __name__ == "__main__":
-    unittest.main()
+if __name__ == "__main__": #runs the tests if the file is executed directly
+    unittest.main() #runs the tests

@@ -8,8 +8,8 @@ from models.pass_ticketing import ExhibitionPass, AllAccessPass, Payment, Transa
 from models.conference import Exhibition, Workshop
 from models.reservation import Reservation
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, "data", "conference_data.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) #gets the base directory of the file
+DATA_FILE = os.path.join(BASE_DIR, "data", "conference_data.pkl") #gets the data file
 
 def save_data(data):
     """
@@ -115,7 +115,7 @@ def initialize_data():
         "next_pass_id": 2,
         "next_transaction_id": 2,
         "next_reservation_id": 2,
-    }
+    } #creates a dictionary with the data
 
-    save_data(data)
-    return data
+    save_data(data) #saves the data to the data file
+    return data #returns the data

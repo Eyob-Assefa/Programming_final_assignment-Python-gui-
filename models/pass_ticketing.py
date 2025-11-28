@@ -21,11 +21,11 @@ class ExhibitionPass(Pass):
     """
     def __init__(self, passId, purchaseDate, price, exhibition_ids):
         super().__init__(passId, purchaseDate, price)
-        if not isinstance(exhibition_ids, list):
+        if not isinstance(exhibition_ids, list):  #checks if exhibition_ids is a list
             raise TypeError("exhibition_ids must be a list of exhibition IDs.")
-        self.exhibition_ids = exhibition_ids
+        self.exhibition_ids = exhibition_ids #stores the list of exhibition IDs
 
-    def is_eligible(self, exhibition):
+    def is_eligible(self, exhibition): 
         """
         Checks if the pass grants access to a given exhibition.
 
@@ -44,8 +44,8 @@ class ExhibitionPass(Pass):
         Args:
             new_exhibition_ids (list): A list of new exhibition IDs to add.
         """
-        self.exhibition_ids.extend(new_exhibition_ids)
-        print(f"Pass {self.passId} has been upgraded.")
+        self.exhibition_ids.extend(new_exhibition_ids) #adds the new exhibition IDs to the pass
+        print(f"Pass {self.passId} has been upgraded.") #prints a message to the console
 
 class AllAccessPass(Pass):
     """A pass that grants access to all exhibitions and includes VIP perks."""
@@ -78,5 +78,5 @@ class Transaction:
 
     def process_payment(self):
         print(f"Processing payment for transaction {self.transactionId}...")
-        self.payment.status = "Completed"
-        return True
+        self.payment.status = "Completed" #sets the status of the payment to completed
+        return True #returns True to indicate that the payment was processed successfully

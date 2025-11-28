@@ -81,13 +81,13 @@ class MainApplication(tk.Tk):
         self.show_frame("AuthFrame")
 
 if __name__ == "__main__":
-    app_data = data_manager.load_data()
-    app = MainApplication(app_data)
+    app_data = data_manager.load_data() #loads the data from the data file
+    app = MainApplication(app_data) #creates the main application
     
-    def on_closing():
-        if messagebox.askokcancel("Quit", "Do you want to exit the application?"):
-            data_manager.save_data(app.data)
-            app.destroy()
+    def on_closing(): #asks the user if they want to exit the application
+        if messagebox.askokcancel("Quit", "Do you want to exit the application?"): #asks the user if they want to exit the application
+            data_manager.save_data(app.data) #saves the data to the data file
+            app.destroy() #closes the application
 
-    app.protocol("WM_DELETE_WINDOW", on_closing)
-    app.mainloop()
+    app.protocol("WM_DELETE_WINDOW", on_closing) #closes the application when the window is closed
+    app.mainloop() #starts the main loop
