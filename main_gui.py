@@ -15,6 +15,7 @@ class MainApplication(tk.Tk):
     def __init__(self, data):
         super().__init__()
         self.data = data
+        # The currently logged-in user (None if signed out).
         self.current_user = None
         self.title("GreenWave Conference Management")
         self.geometry("1200x800")
@@ -24,11 +25,13 @@ class MainApplication(tk.Tk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
+        # Main container for stacked page frames (login, dashboards, purchase, reservation).
         self.container = tk.Frame(self)
         self.container.grid(row=0, column=0, sticky="nsew")
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
+        # Instantiate each page frame and register it in self.frames.
         self.frames = {}
         for F in (AuthFrame, AttendeeDashboard, PurchaseFrame, AdminDashboard, ExhibitionReservationFrame):
             page_name = F.__name__
@@ -49,33 +52,31 @@ class MainApplication(tk.Tk):
         frame.tkraise()
 
     def set_user(self, user):
-        """
-        Sets the current user and navigates to the appropriate dashboard.
-
-        Args:
-            user (User): The user who has logged in.
-        """
+        """Set `current_user` and route to Admin or Attendee dashboard based on role."""
         self.current_user = user
         if isinstance(user, Administrator):
+            # Go to admin dashboard for admin users.
             self.show_frame("AdminDashboard")
         else:
+            # Attendees go to the attendee dashboard.
             self.show_frame("AttendeeDashboard")
     
     def logout(self):
-        """
-        Logs out the current user and returns to the login screen.
-        """
+        """Sign out current user and return to the login screen."""
         self.current_user = None
         self.show_frame("AuthFrame")
 
 if __name__ == "__main__":
+    # Load data and start the main application loop.
     app_data = data_manager.load_data()
     app = MainApplication(app_data)
     
     def on_closing():
+        """Handle application close event."""
+        # Ask to confirm exit; if confirmed, save data and close the app.
         if messagebox.askokcancel("Quit", "Do you want to exit the application?"):
             data_manager.save_data(app.data)
             app.destroy()
-
+    # Bind the close event to on_closing handler.
     app.protocol("WM_DELETE_WINDOW", on_closing)
     app.mainloop()
