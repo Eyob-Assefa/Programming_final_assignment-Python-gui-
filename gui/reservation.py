@@ -1,3 +1,5 @@
+"""Legacy reservation frame for selecting exhibitions at a glance."""
+
 import tkinter as tk
 from tkinter import messagebox
 from models.pass_ticketing import ExhibitionPass
@@ -11,7 +13,10 @@ LABEL_FONT = ("Segoe UI", 12)
 BUTTON_FONT = ("Segoe UI", 12, "bold")
 
 class ExhibitionReservationFrame(tk.Frame):
+    """Simplified reservation flow primarily used for demos."""
+
     def __init__(self, parent, controller):
+        """Constructs UI controls and loads the exhibition list."""
         super().__init__(parent)
         self.controller = controller
         self.configure(bg=BG_COLOR)
@@ -38,6 +43,7 @@ class ExhibitionReservationFrame(tk.Frame):
                   command=lambda: controller.show_frame("AttendeeDashboard")).pack(pady=5)
 
     def refresh_exhibitions(self):
+        """Re-populates the listbox with exhibitions from shared data."""
         self.ex_listbox.delete(0, tk.END)
         # Check if data exists in controller
         exhibitions = getattr(self.controller, "data", {}).get("exhibitions", {})
@@ -49,6 +55,7 @@ class ExhibitionReservationFrame(tk.Frame):
             self.ex_listbox.insert(tk.END, f"{ex_id}: {ex.name}")
 
     def reserve_spot(self):
+        """Adds the selected exhibition to the attendee's pass."""
         selection = self.ex_listbox.curselection()
         if not selection:
             messagebox.showwarning("Warning", "Please select an exhibition.")
@@ -65,6 +72,7 @@ class ExhibitionReservationFrame(tk.Frame):
             return
         
         # Find a valid ExhibitionPass
+        # Grab the first exhibition pass we can find for this user.
         valid_pass = None
         for p in user.passes:
             if isinstance(p, ExhibitionPass):

@@ -1,3 +1,5 @@
+"""Authentication and registration GUI for attendees and admins."""
+
 import tkinter as tk
 from tkinter import ttk, messagebox, Toplevel
 from models.user import Attendee, Administrator
@@ -15,6 +17,7 @@ class AuthFrame(tk.Frame):
     The authentication frame, handling both login and registration.
     """
     def __init__(self, parent, controller):
+        """Constructs the static login form and CTA buttons."""
         super().__init__(parent)
         self.controller = controller
         
@@ -51,6 +54,7 @@ class AuthFrame(tk.Frame):
         register_button.pack(side="left", padx=10)
 
     def login(self):
+        """Validates the credentials entered in the login form."""
         username = self.username_entry.get()
         password = self.password_entry.get()
 
@@ -65,6 +69,7 @@ class AuthFrame(tk.Frame):
             messagebox.showerror("Login Error", "Invalid username or password.")
 
     def open_registration(self):
+        """Displays the modal registration window."""
         RegistrationWindow(self, self.controller)
 
 class RegistrationWindow(Toplevel):
@@ -72,6 +77,7 @@ class RegistrationWindow(Toplevel):
     A separate window for new attendee registration.
     """
     def __init__(self, parent, controller):
+        """Initializes widgets for all profile fields."""
         super().__init__(parent)
         self.controller = controller
         self.title("Register New Attendee")
@@ -113,6 +119,7 @@ class RegistrationWindow(Toplevel):
         register_btn.grid(row=6, column=0, columnspan=2, pady=20)
 
     def register(self):
+        """Handles validation and creation of a user account."""
         username = self.reg_username.get()
         name = self.reg_name.get()
         email = self.reg_email.get()

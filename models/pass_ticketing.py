@@ -1,7 +1,10 @@
+"""Pass, payment, and transaction entities used throughout the GUI."""
+
 from datetime import date
 
 class Pass:
     """A base class for different types of passes."""
+
     def __init__(self, passId, purchaseDate, price):
         """Initializes a new Pass."""
         self.passId = passId
@@ -9,7 +12,8 @@ class Pass:
         self.price = price
 
     def is_eligible(self, exhibition):
-        pass
+        """Implemented by subclasses to enforce access rules."""
+        raise NotImplementedError("Concrete pass types must define eligibility.")
 
 class ExhibitionPass(Pass):
     """

@@ -1,3 +1,5 @@
+"""GUI components for purchasing passes and processing payments."""
+
 import tkinter as tk
 from tkinter import messagebox
 from datetime import date
@@ -12,7 +14,10 @@ LABEL_FONT = ("Segoe UI", 12)
 BUTTON_FONT = ("Segoe UI", 12, "bold")
 
 class PurchaseFrame(tk.Frame):
+    """Landing page for choosing a pass type and starting checkout."""
+
     def __init__(self, parent, controller):
+        """Builds the static UI since this frame has no dynamic lists."""
         super().__init__(parent)
         self.controller = controller
 
@@ -24,7 +29,7 @@ class PurchaseFrame(tk.Frame):
         # Pass Selection
         tk.Label(self, text="Select Pass Type:", font=LABEL_FONT, bg=BG_COLOR, fg=TEXT_COLOR).pack(pady=5)
         
-        # We use a string var to track selection
+        # Track the radio selection so we know which flow to trigger later.
         self.pass_var = tk.StringVar(value="ExhibitionPass")
         
         rb_frame = tk.Frame(self, bg=BG_COLOR)
@@ -71,6 +76,7 @@ class PurchaseFrame(tk.Frame):
             
         if new_pass:
             self.controller.data['next_pass_id'] += 1
+            # Store pass on the user object so dashboards refresh automatically.
             user.passes.append(new_pass)
             messagebox.showinfo("Success", f"You have successfully purchased: {selected_type}")
             self.controller.show_frame("AttendeeDashboard")
@@ -119,6 +125,7 @@ class ExhibitionSelectionForPurchase(tk.Toplevel):
         cancel_btn.pack(side="left", padx=5)
     
     def proceed_to_payment(self):
+        """Validates the selection and opens the payment modal."""
         selection = self.ex_listbox.curselection()
         if not selection:
             messagebox.showwarning("Warning", "Please select an exhibition.")
@@ -189,7 +196,7 @@ class PaymentWindow(tk.Toplevel):
         cancel_btn.pack(side="left", padx=5)
     
     def confirm_payment(self):
-        """Validates and processes payment."""
+        """Validates payment fields before delegating to ``PurchaseFrame``."""
         card_number = self.card_number.get().strip()
         expiry = self.expiry.get().strip()
         cvv = self.cvv.get().strip()

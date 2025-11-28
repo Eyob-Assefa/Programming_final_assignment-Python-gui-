@@ -1,2 +1,2 @@
-# Makes the models directory a package so imports like `from models.user ...` work everywhere.
+"""Marks ``models`` as a package so relative imports work throughout the app."""
 

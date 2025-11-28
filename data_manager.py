@@ -1,3 +1,5 @@
+"""Persistence helpers for loading/saving conference state to disk."""
+
 import pickle
 import os
 from datetime import datetime, date
@@ -11,7 +13,8 @@ DATA_FILE = os.path.join(BASE_DIR, "data", "conference_data.pkl")
 
 def save_data(data):
     """
-    Saves the application data to a file using Pickle.
+    Serializes the in-memory ``data`` dictionary using Pickle so the GUI can
+    resume where it left off between launches.
 
     Args:
         data (dict): A dictionary containing all application data.
@@ -26,7 +29,7 @@ def save_data(data):
 
 def load_data():
     """
-    Loads the application data from a file. If the file doesn't exist,
+    Loads the application data from disk. If the file doesn't exist,
     it initializes with sample data.
 
     Returns:
@@ -44,7 +47,9 @@ def load_data():
 
 def initialize_data():
     """
-    Creates a set of sample data for the application.
+    Creates a set of sample data for the application by instantiating
+    exhibitions, workshops, users, passes, and reservations. This doubles as a
+    smoke test that the various model classes can be constructed correctly.
 
     Returns:
         dict: A dictionary containing the initial sample data.

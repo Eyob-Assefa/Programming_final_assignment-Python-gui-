@@ -1,3 +1,5 @@
+"""Attendee-facing dashboard for passes, profile management, and bookings."""
+
 import tkinter as tk
 from tkinter import ttk, messagebox, Toplevel, scrolledtext
 from datetime import datetime
@@ -16,6 +18,7 @@ class AttendeeDashboard(tk.Frame):
     The main dashboard for a logged-in attendee.
     """
     def __init__(self, parent, controller):
+        """Builds the profile, pass, and reservation sections."""
         super().__init__(parent)
         self.controller = controller
         self.configure(bg=BG_COLOR)
@@ -195,6 +198,7 @@ class AttendeeDashboard(tk.Frame):
         for item in self.reservations_tree.get_children():
             self.reservations_tree.delete(item)
 
+        # Rebuild from the user's live reservation objects.
         for res in user.reservations:
             if res.workshop:
                 workshop = res.workshop
@@ -202,13 +206,16 @@ class AttendeeDashboard(tk.Frame):
                 self.reservations_tree.insert("", "end", values=(res.reservationId, workshop.title, start_time))
 
     def open_edit_profile(self):
+        """Opens the profile editor modal."""
         EditProfileWindow(self, self.controller)
         
     def delete_account(self):
+        """Deletes the current user's account after confirmation."""
         user = self.controller.current_user
         confirm = messagebox.askyesno("Delete Account", "Are you sure you want to permanently delete your account? This action cannot be undone.")
         
         if confirm:
+            # Removing the key immediately revokes dashboard access.
             del self.controller.data["users"][user.userId]
             messagebox.showinfo("Account Deleted", "Your account has been successfully deleted.")
             self.controller.logout()
@@ -222,6 +229,8 @@ class AttendeeDashboard(tk.Frame):
         ExhibitionSelectionWindow(self, self.controller, pass_obj, self)
 
 class EditProfileWindow(tk.Toplevel):
+    """Modal dialog used to update attendee contact information."""
+
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -255,6 +264,7 @@ class EditProfileWindow(tk.Toplevel):
         save_btn.grid(row=3, column=0, columnspan=2, pady=20)
         
     def save_changes(self):
+        """Validates and persists updates back to the shared user record."""
         new_name = self.name_entry.get()
         new_email = self.email_entry.get()
         new_phone = self.phone_entry.get()
@@ -340,6 +350,7 @@ class WorkshopRegistrationWindow(Toplevel):
         cancel_btn.pack(side="left", padx=5)
     
     def add_workshop(self):
+        """Creates a reservation for the selected workshop."""
         selection = self.workshop_tree.selection()
         if not selection:
             messagebox.showwarning("Warning", "Please select a workshop.")
@@ -374,6 +385,7 @@ class WorkshopRegistrationWindow(Toplevel):
         reservation_id = f"res{self.controller.data['next_reservation_id']}"
         self.controller.data['next_reservation_id'] += 1
         
+        # Link both attendee and workshop so each can display bookings later.
         new_reservation = Reservation(reservation_id, datetime.now(), "Confirmed", user, workshop)
         user.reservations.append(new_reservation)
         workshop.reservations.append(new_reservation)
@@ -434,6 +446,7 @@ class ExhibitionSelectionWindow(Toplevel):
         cancel_btn.pack(side="left", padx=5)
     
     def select_and_register(self):
+        """Delegates to workshop registration after picking an exhibition."""
         selection = self.ex_tree.selection()
         if not selection:
             messagebox.showwarning("Warning", "Please select an exhibition.")

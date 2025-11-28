@@ -1,3 +1,11 @@
+"""Entry point for the GreenWave Conference desktop application.
+
+This module wires together the various GUI frames (authentication, attendee and
+admin dashboards, purchasing, reservations) and keeps a shared ``data`` object
+in memory so that all screens operate on the same state. The primary task here
+is orchestrating navigation and persisting data when the window closes.
+"""
+
 import tkinter as tk
 from tkinter import messagebox
 import data_manager
@@ -14,6 +22,8 @@ class MainApplication(tk.Tk):
     """
     def __init__(self, data):
         super().__init__()
+        # Shared data dictionary loaded via ``data_manager`` so every frame reads
+        # and writes to the same structure.
         self.data = data
         self.current_user = None
         self.title("GreenWave Conference Management")
@@ -32,6 +42,8 @@ class MainApplication(tk.Tk):
         self.frames = {}
         for F in (AuthFrame, AttendeeDashboard, PurchaseFrame, AdminDashboard, ExhibitionReservationFrame):
             page_name = F.__name__
+            # All frames receive a reference to ``self`` so they can invoke
+            # navigation helpers (``show_frame``) or mutate shared data.
             frame = F(parent=self.container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -40,10 +52,10 @@ class MainApplication(tk.Tk):
 
     def show_frame(self, page_name):
         """
-        Shows a frame for the given class, creating it if it doesn't exist.
+        Raises the frame referenced by ``page_name`` within the container.
 
         Args:
-            frame_class (tk.Frame): The class of the frame to show.
+            page_name (str): Key stored in ``self.frames`` (e.g. "AuthFrame").
         """
         frame = self.frames[page_name]
         frame.tkraise()
