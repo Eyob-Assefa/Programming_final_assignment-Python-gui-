@@ -1,22 +1,3 @@
-"""
-Admin Dashboard UI module
-
-This module implements the administrative user interface for the conference
-management application. It contains the primary `AdminDashboard` frame as
-well as several helper modal windows used to manage exhibitions and
-workshops (add/edit/delete), and to upgrade attendee passes.
-
-Main components:
-- AdminDashboard: Main admin frame with a tabbed interface for overview,
-    workshop and attendee management, and content management.
-- ExhibitionEditorWindow / WorkshopEditorWindow: Toplevel windows for
-    creating and editing exhibits and workshops.
-- UpgradeWindow: Toplevel window to enhance an attendee's pass.
-
-The module expects a `controller` object that provides access to the shared
-`data` dictionary and utility methods like `logout` and `show_frame`.
-"""
-
 import tkinter as tk
 from tkinter import ttk, messagebox, Toplevel
 from collections import defaultdict
@@ -40,6 +21,7 @@ class AdminDashboard(tk.Frame):
     The main dashboard for an administrator.
     """
     def __init__(self, parent, controller):
+        """Initializes the notebook-based layout and populates each tab."""
         super().__init__(parent)
         self.controller = controller
         self.configure(bg=BG_COLOR)
@@ -78,8 +60,6 @@ class AdminDashboard(tk.Frame):
         self.setup_content_tab()
 
     def tkraise(self, aboveThis=None):
-        # Refresh data whenever this frame is raised/activated so the view
-        # always reflects the most up-to-date data in `controller.data`.
         self.refresh_data()
         super().tkraise(aboveThis)
         
@@ -94,8 +74,6 @@ class AdminDashboard(tk.Frame):
 
     # --- Overview Tab ---
     def setup_overview_tab(self):
-        """Sets up the overview tab with sales analytics."""
-        # Layout for the overview tab
         self.overview_tab.columnconfigure(0, weight=1)
         frame = ttk.LabelFrame(self.overview_tab, text="Sales Analytics")
         frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
@@ -113,8 +91,6 @@ class AdminDashboard(tk.Frame):
         self.pass_by_type_label.pack(anchor="w", padx=10, pady=(10,0))
         
     def update_overview_tab(self):
-        # Compute aggregate analytics: total passes, revenue and a breakdown
-        # by pass type for display in the dashboard overview.
         total_passes = 0
         total_revenue = 0.0
         pass_counts = defaultdict(int)
@@ -122,7 +98,6 @@ class AdminDashboard(tk.Frame):
         for user in self.controller.data["users"].values():
             # Only consider attendees (not admins or other user types)
             if isinstance(user, Attendee):
-                # Aggregate passes and revenue for this attendee
                 total_passes += len(user.passes)
                 for p in user.passes:
                     # Sum up the price of each pass
@@ -140,9 +115,6 @@ class AdminDashboard(tk.Frame):
 
     # --- Workshops Tab ---
     def setup_workshops_tab(self):
-        """Sets up the workshop management tab."""
-
-        # Layout for the workshops tab
         self.workshops_tab.columnconfigure(0, weight=1)
         self.workshops_tab.rowconfigure(0, weight=1)
 
@@ -162,12 +134,6 @@ class AdminDashboard(tk.Frame):
         self.ws_tree.pack(fill="both", expand=True)
         
     def update_workshops_tab(self):
-        """Updates the workshop management tab with current data."""
-
-
-        # Rebuild the tree view: clear out the rows and reinsert current data
-        # from exhibitions and their workshops so the admin sees accurate
-        # reservation counts and availability.
         for item in self.ws_tree.get_children():
             self.ws_tree.delete(item)
         
@@ -175,11 +141,11 @@ class AdminDashboard(tk.Frame):
             for ws in ex.workshops:
                 reserved = len(ws.reservations)
                 available = ws.check_availability()
+                # Tree rows combine exhibition metadata with live capacity stats.
                 self.ws_tree.insert("", "end", values=(ex.name, ws.title, ws.capacity, reserved, available))
 
     # --- Attendees Tab ---
     def setup_attendees_tab(self):
-        """Sets up the attendee management tab."""
         self.attendees_tab.columnconfigure(0, weight=1)
         self.attendees_tab.rowconfigure(0, weight=1)
         frame = ttk.LabelFrame(self.attendees_tab, text="Manage Attendees")
@@ -200,11 +166,6 @@ class AdminDashboard(tk.Frame):
         upgrade_btn.grid(row=1, column=0, pady=10)
 
     def update_attendees_tab(self):
-        """Updates the attendee management tab with current data."""
-
-        # Update attendee listing with current users and pass counts.
-        # Use `user.userId` as the iid to allow selecting the attendee for
-        # other operations (like upgrades).
         for item in self.attendee_tree.get_children():
             # Clear out existing rows to refresh the attendee list
             self.attendee_tree.delete(item)
@@ -216,7 +177,6 @@ class AdminDashboard(tk.Frame):
                 self.attendee_tree.insert("", "end", iid=user.userId, values=(user.userId, user.name, user.email, pass_count))
                 
     def open_upgrade_window(self):
-        """Opens the upgrade window for the selected attendee."""
         selected = self.attendee_tree.selection()
         if not selected:
             messagebox.showerror("Error", "Please select an attendee to manage.")
@@ -230,7 +190,6 @@ class AdminDashboard(tk.Frame):
 
     # --- Content Tab ---
     def setup_content_tab(self):
-        """Sets up the content management tab."""
         self.content_tab.columnconfigure(0, weight=1)
         self.content_tab.rowconfigure(0, weight=1)
         
@@ -278,7 +237,6 @@ class AdminDashboard(tk.Frame):
         self.ex_tree.bind("<<TreeviewSelect>>", self.on_exhibition_select)
 
     def update_content_tab(self):
-        """Clear and reload exhibition listing in the content manager tab."""
         for item in self.ex_tree.get_children():
             # Clear existing exhibition entries
             self.ex_tree.delete(item)
@@ -288,11 +246,9 @@ class AdminDashboard(tk.Frame):
             self.ex_tree.insert("", "end", iid=ex.exhibitionId, values=(ex.exhibitionId, ex.name, ex.description))
             
     def add_exhibition(self):
-        """Open the exhibition editor window to add a new exhibition."""
         ExhibitionEditorWindow(self, self.controller)
 
     def edit_exhibition(self):
-        """Open the exhibition editor window to edit the selected exhibition."""
         selected = self.ex_tree.selection()
         if not selected:
             messagebox.showerror("Error", "Please select an exhibition to edit.")
@@ -305,7 +261,6 @@ class AdminDashboard(tk.Frame):
         ExhibitionEditorWindow(self, self.controller, exhibition=exhibition)
 
     def delete_exhibition(self):
-        """Delete the selected exhibition after confirmation."""
         selected = self.ex_tree.selection()
         if not selected:
             messagebox.showerror("Error", "Please select an exhibition to delete.")
@@ -317,8 +272,7 @@ class AdminDashboard(tk.Frame):
         confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete exhibition '{ex_id}'? This will also delete all its workshops and any reservations for them.")
         
         if confirm:
-            # First, remove any workshop reservations that belong to the
-            # deleted exhibition from users' reservation lists.
+            # First, remove any reservations for workshops in this exhibition
             for user in self.controller.data["users"].values():
                 if hasattr(user, 'reservations'):
                     user.reservations = [r for r in user.reservations if r.workshop.workshopId not in [w.workshopId for w in self.controller.data["exhibitions"][ex_id].workshops]]
@@ -328,8 +282,6 @@ class AdminDashboard(tk.Frame):
             messagebox.showinfo("Success", "Exhibition deleted.")
             
     def on_exhibition_select(self, event):
-        """Update the workshop list when an exhibition is selected."""
-        # Clear existing workshop entries
         for item in self.ws_content_tree.get_children():
             # Clear existing workshop entries
             self.ws_content_tree.delete(item)
@@ -343,12 +295,11 @@ class AdminDashboard(tk.Frame):
         ex_id = selected[0]
         exhibition = self.controller.data["exhibitions"][ex_id]
         for ws in exhibition.workshops:
+            # Display a snapshot so admins can quickly audit workshop metadata.
             self.ws_content_tree.insert("", "end", iid=ws.workshopId, values=(ws.workshopId, ws.title, ws.capacity, ws.startTime.strftime("%Y-%m-%d %H:%M")))
 
     def add_workshop(self):
-        """Open the workshop editor window to add a new workshop to the selected exhibition."""
-        
-        selected_ex = self.ex_tree.selection() # Get selected exhibition
+        selected_ex = self.ex_tree.selection()
         if not selected_ex:
             messagebox.showerror("Error", "Please select an exhibition to add a workshop to.")
             return
@@ -356,8 +307,6 @@ class AdminDashboard(tk.Frame):
         WorkshopEditorWindow(self, self.controller, selected_ex[0])
 
     def edit_workshop(self):
-        """Open the workshop editor window to edit the selected workshop."""
-
         selected_ws = self.ws_content_tree.selection()
         if not selected_ws:
             messagebox.showerror("Error", "Please select a workshop to edit.")
@@ -371,9 +320,6 @@ class AdminDashboard(tk.Frame):
             WorkshopEditorWindow(self, self.controller, ex_id, workshop=workshop)
 
     def delete_workshop(self):
-        """Delete the selected workshop after confirmation."""
-
-        # Get the selected workshop
         selected_ws = self.ws_content_tree.selection()
         if not selected_ws:
             messagebox.showerror("Error", "Please select a workshop to delete.")
@@ -395,15 +341,12 @@ class AdminDashboard(tk.Frame):
             for user in self.controller.data["users"].values():
                 # Check if user has reservations attribute
                 if hasattr(user, 'reservations'):
-                    #then filter out reservations for the deleted workshop
                     user.reservations = [r for r in user.reservations if r.workshop.workshopId != ws_id]
             self.on_exhibition_select(None)
             messagebox.showinfo("Success", "Workshop deleted.")
 
 
 class ExhibitionEditorWindow(Toplevel):
-    """Window for adding or editing an exhibition."""
-
     def __init__(self, parent, controller, exhibition=None):
         super().__init__(parent)
         self.controller = controller
@@ -445,7 +388,6 @@ class ExhibitionEditorWindow(Toplevel):
         save_btn.grid(row=3, column=0, columnspan=2, pady=10)
 
     def save(self):
-        """Saves the exhibition data from the form."""
         ex_id = self.id_entry.get()
         name = self.name_entry.get()
         description = self.desc_entry.get()
@@ -474,8 +416,6 @@ class ExhibitionEditorWindow(Toplevel):
 
 
 class WorkshopEditorWindow(Toplevel):
-    """Window for adding or editing a workshop."""
-
     def __init__(self, parent, controller, exhibition_id, workshop=None):
         super().__init__(parent)
         self.controller = controller
@@ -531,6 +471,7 @@ class WorkshopEditorWindow(Toplevel):
         save_btn.grid(row=5, column=0, columnspan=2, pady=10)
 
     def save(self):
+        """Validates inputs and updates the workshop list."""
         from datetime import datetime
         from models.conference import Workshop
 
@@ -555,6 +496,7 @@ class WorkshopEditorWindow(Toplevel):
                 self.workshop.startTime = start_time
                 self.workshop.endTime = end_time
             else: # Adding
+                # Ensure workshop IDs are globally unique across exhibitions.
                 if any(ws.workshopId == ws_id for ex in self.controller.data["exhibitions"].values() for ws in ex.workshops):
                     messagebox.showerror("Error", "Workshop ID already exists.")
                     return
@@ -572,8 +514,6 @@ class WorkshopEditorWindow(Toplevel):
 
 
 class UpgradeWindow(Toplevel):
-    """Window for upgrading an attendee's pass with additional exhibitions."""
-
     def __init__(self, parent, controller, attendee):
         super().__init__(parent)
         self.controller = controller
@@ -612,8 +552,6 @@ class UpgradeWindow(Toplevel):
         upgrade_btn.grid(row=3, column=0, pady=10)
         
     def populate_passes(self):
-        # Fill the pass listbox with the attendee's exhibition passes only.
-        # We only allow upgrading ExhibitionPass objects here.
         self.pass_listbox.delete(0, "end")
         for i, p in enumerate(self.attendee.passes):
             if isinstance(p, ExhibitionPass):
@@ -621,11 +559,6 @@ class UpgradeWindow(Toplevel):
                 self.pass_listbox.insert("end", f"{p.passId} - Exhibition Pass ({len(p.exhibition_ids)} exhibitions)")
 
     def on_pass_select(self, event):
-        """Populate the exhibitions list based on the selected pass."""
-
-        # When a pass is selected, populate the exhibitions list with those
-        # that are not already included in the selected pass so the admin can
-        # add additional exhibitions.
         self.ex_listbox.delete(0, "end")
         selected_indices = self.pass_listbox.curselection()
         if not selected_indices: return
@@ -642,9 +575,6 @@ class UpgradeWindow(Toplevel):
                 self.ex_listbox.insert("end", f"{ex.name} [{ex_id}]")
     
     def upgrade_pass(self):
-        """Handles the upgrade of the selected pass with new exhibitions."""
-
-        # Get selected pass and exhibitions
         pass_indices = self.pass_listbox.curselection()
         ex_indices = self.ex_listbox.curselection()
         

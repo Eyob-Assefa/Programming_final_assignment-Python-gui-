@@ -1,3 +1,5 @@
+"""Persistence helpers for loading/saving conference state to disk."""
+
 import pickle
 import os
 from datetime import datetime, date
@@ -6,12 +8,13 @@ from models.pass_ticketing import ExhibitionPass, AllAccessPass, Payment, Transa
 from models.conference import Exhibition, Workshop
 from models.reservation import Reservation
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, "data", "conference_data.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) #gets the base directory of the file
+DATA_FILE = os.path.join(BASE_DIR, "data", "conference_data.pkl") #gets the data file
 
 def save_data(data):
     """
-    Saves the application data to a file using Pickle.
+    Serializes the in-memory ``data`` dictionary using Pickle so the GUI can
+    resume where it left off between launches.
 
     Args:
         data (dict): A dictionary containing all application data.
@@ -26,7 +29,7 @@ def save_data(data):
 
 def load_data():
     """
-    Loads the application data from a file. If the file doesn't exist,
+    Loads the application data from disk. If the file doesn't exist,
     it initializes with sample data.
 
     Returns:
@@ -44,7 +47,9 @@ def load_data():
 
 def initialize_data():
     """
-    Creates a set of sample data for the application.
+    Creates a set of sample data for the application by instantiating
+    exhibitions, workshops, users, passes, and reservations. This doubles as a
+    smoke test that the various model classes can be constructed correctly.
 
     Returns:
         dict: A dictionary containing the initial sample data.
@@ -110,7 +115,7 @@ def initialize_data():
         "next_pass_id": 2,
         "next_transaction_id": 2,
         "next_reservation_id": 2,
-    }
+    } #creates a dictionary with the data
 
-    save_data(data)
-    return data
+    save_data(data) #saves the data to the data file
+    return data #returns the data

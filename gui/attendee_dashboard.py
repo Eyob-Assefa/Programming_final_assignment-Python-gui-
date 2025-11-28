@@ -1,21 +1,3 @@
-"""
-Attendee Dashboard UI module
-
-This module implements the user-facing attendee dashboard used by
-conference attendees. It provides an overview of the attendee's profile,
-passes, and workshop reservations and includes windows for editing profile
-information as well as registering for workshops and selecting exhibitions.
-
-Key classes:
-- AttendeeDashboard: Main dashboard frame that shows user data and actions.
-- EditProfileWindow: Toplevel window to edit the logged-in user's profile.
-- WorkshopRegistrationWindow: Register the attendee for a workshop in an exhibition.
-- ExhibitionSelectionWindow: Choose an exhibition for AllAccessPass registration.
-
-The module expects a `controller` object that holds shared `data` and
-provides utility functions such as `show_frame` and `logout`.
-"""
-
 import tkinter as tk
 from tkinter import ttk, messagebox, Toplevel, scrolledtext
 from datetime import datetime
@@ -36,6 +18,7 @@ class AttendeeDashboard(tk.Frame):
     The main dashboard for a logged-in attendee.
     """
     def __init__(self, parent, controller):
+        """Builds the profile, pass, and reservation sections."""
         super().__init__(parent)
         self.controller = controller
         self.configure(bg=BG_COLOR)
@@ -229,6 +212,7 @@ class AttendeeDashboard(tk.Frame):
         for item in self.reservations_tree.get_children():
             self.reservations_tree.delete(item)
 
+        # Rebuild from the user's live reservation objects.
         for res in user.reservations:
             if res.workshop:
                 workshop = res.workshop
@@ -236,17 +220,17 @@ class AttendeeDashboard(tk.Frame):
                 self.reservations_tree.insert("", "end", values=(res.reservationId, workshop.title, start_time))
 
     def open_edit_profile(self):
-        """Opens the Edit Profile window."""
+        """Opens the profile editor modal for the current user."""
         EditProfileWindow(self, self.controller)
         
     def delete_account(self):
-        """Handles account deletion after user confirmation."""
         user = self.controller.current_user
         confirm = messagebox.askyesno("Delete Account", "Are you sure you want to permanently delete your account? This action cannot be undone.")
         
         # If user confirms deletion, remove the user from the data store
         # and then logout so the UI returns to the login screen.
         if confirm:
+            # Removing the key immediately revokes dashboard access.
             del self.controller.data["users"][user.userId]
             messagebox.showinfo("Account Deleted", "Your account has been successfully deleted.")
             self.controller.logout()
@@ -260,7 +244,6 @@ class AttendeeDashboard(tk.Frame):
         ExhibitionSelectionWindow(self, self.controller, pass_obj, self)
 
 class EditProfileWindow(tk.Toplevel):
-    """Window for editing the logged-in user's profile information."""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller # Reference to main controller
@@ -302,10 +285,9 @@ class EditProfileWindow(tk.Toplevel):
         save_btn.grid(row=3, column=0, columnspan=2, pady=20)
         
     def save_changes(self):
-        """Validate and save profile changes."""
-        new_name = self.name_entry.get()# Get new name from entry
-        new_email = self.email_entry.get()# Get new email from entry
-        new_phone = self.phone_entry.get()# Get new phone from entry
+        new_name = self.name_entry.get()
+        new_email = self.email_entry.get()
+        new_phone = self.phone_entry.get()
         
         # Validate and write back profile changes on success, and refresh
         # the dashboard to display the updated information.
@@ -399,9 +381,6 @@ class WorkshopRegistrationWindow(Toplevel):
         cancel_btn.pack(side="left", padx=5)
     
     def add_workshop(self):
-        # Create a reservation for a selected workshop after validation
-        # (already registered/availability). New reservation ids are
-        # created using the `next_reservation_id` counter on the controller.
         selection = self.workshop_tree.selection()
         if not selection:
             messagebox.showwarning("Warning", "Please select a workshop.")
@@ -437,9 +416,6 @@ class WorkshopRegistrationWindow(Toplevel):
         reservation_id = f"res{self.controller.data['next_reservation_id']}"
         self.controller.data['next_reservation_id'] += 1
         
-        # If the workshop is available, create a new reservation and add
-        # references to both the user and the workshop to keep both sides
-        # of the relation in sync.
         new_reservation = Reservation(reservation_id, datetime.now(), "Confirmed", user, workshop)
         user.reservations.append(new_reservation)
         workshop.reservations.append(new_reservation)
@@ -507,8 +483,6 @@ class ExhibitionSelectionWindow(Toplevel):
         cancel_btn.pack(side="left", padx=5)
     
     def select_and_register(self):
-        """Handles exhibition selection and opens workshop registration."""
-        # Get selected exhibition
         selection = self.ex_tree.selection()
         if not selection:
             # Warn if no exhibition is selected

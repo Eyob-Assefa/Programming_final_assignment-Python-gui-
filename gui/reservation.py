@@ -29,6 +29,7 @@ class ExhibitionReservationFrame(tk.Frame):
     """Frame for attendees to reserve exhibition spots."""
 
     def __init__(self, parent, controller):
+        """Constructs UI controls and loads the exhibition list."""
         super().__init__(parent)
         self.controller = controller
         self.configure(bg=BG_COLOR)
@@ -91,8 +92,8 @@ class ExhibitionReservationFrame(tk.Frame):
             self.controller.show_frame("AuthFrame")
             return
         
-        # Check whether the current user has a valid ExhibitionPass to use
-        # for this action; users without the appropriate pass cannot reserve.
+    # Check whether the current user has a valid ExhibitionPass to use
+    # for this action; users without the appropriate pass cannot reserve.
         valid_pass = None
         for p in user.passes:
             #  Look for an ExhibitionPass among the user's passes

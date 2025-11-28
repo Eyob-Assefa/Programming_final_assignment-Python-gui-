@@ -29,9 +29,6 @@ class AuthFrame(tk.Frame):
     The authentication frame, handling both login and registration.
     """
     def __init__(self, parent, controller):
-        """
-        Initialize the authentication frame.
-        """
         super().__init__(parent)
         self.controller = controller # Reference to the main controller
         self.configure(bg=BG_COLOR)  # Set background color for the frame
@@ -71,12 +68,9 @@ class AuthFrame(tk.Frame):
         register_button.pack(side="left", padx=10)
 
     def login(self):
-        """Handle the login logic when the user clicks the login button.
-        """
-        username = self.username_entry.get() # Get username from entry
-        password = self.password_entry.get() # Get password from entry
+        username = self.username_entry.get()
+        password = self.password_entry.get()
 
-        # Basic input validation: neither username nor password should be empty.
         if not username or not password:
             messagebox.showerror("Login Error", "Username and password cannot be empty.")
             return
@@ -91,7 +85,6 @@ class AuthFrame(tk.Frame):
             messagebox.showerror("Login Error", "Invalid username or password.")
 
     def open_registration(self):
-        """Open the registration window for new users."""
         RegistrationWindow(self, self.controller)
 
 class RegistrationWindow(Toplevel):
@@ -99,9 +92,6 @@ class RegistrationWindow(Toplevel):
     A separate window for new attendee registration.
     """
     def __init__(self, parent, controller):
-        """
-        Initialize the registration window.
-        """
         super().__init__(parent)
         self.controller = controller
         self.title("Register New Attendee")
@@ -149,16 +139,12 @@ class RegistrationWindow(Toplevel):
         register_btn.grid(row=6, column=0, columnspan=2, pady=20)
 
     def register(self):
-        """Handle the registration logic when the user submits the form."""
-        username = self.reg_username.get() # Get username from entry
-        name = self.reg_name.get()# Get full name from entry
-        email = self.reg_email.get() # Get email from entry
-        password = self.reg_password.get() # Get password from entry
-        phone = self.reg_phone.get() # Get phone from entry
+        username = self.reg_username.get()
+        name = self.reg_name.get()
+        email = self.reg_email.get()
+        password = self.reg_password.get()
+        phone = self.reg_phone.get()
 
-        # Validate form inputs before creating a new user. Minimal checks
-        # include non-empty fields, basic email format checking and phone
-        # digits-only validation.
         if not all([username, name, email, password, phone]):
             messagebox.showerror("Registration Error", "All fields are required.")
             return
